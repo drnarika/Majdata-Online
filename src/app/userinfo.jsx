@@ -3,6 +3,7 @@ import React from 'react';
 import useSWR from 'swr';
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
+
 export default function UserInfo({apiroot}){
   function getCookie(cname) {
       if (typeof window !== 'undefined') { 

@@ -59,6 +59,20 @@ h1 {
   cursor: pointer;
 }
 
+.xxlb {
+  width: 5rem;
+  border-radius: 5px;
+  margin-right: 20px;
+  display: inline;
+}
+
+.navBar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+}
+
 @media screen and (max-width: 500px) {
   .xxlb {
     width: 2rem;
@@ -83,13 +97,6 @@ h1 {
     width: 100%;
     bottom: 0px;
   }
-}
-
-.xxlb {
-  width: 5rem;
-  border-radius: 5px;
-  margin-right: 20px;
-  display: inline;
 }
 
 .linkContent {

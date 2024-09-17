@@ -20,10 +20,16 @@ import InteractCount from "./interact";
 export default function Page() {
   const [source, target] = useSingleton();
   const [sortType, setSortType] = useState(0);
-  const [isInitSorted, setIsInitSorted] = useState(false);
+  // const [isInitSorted, setIsInitSorted] = useState(false);
+  
+  // 查询参数获取
   const searchParams = useSearchParams();
-  const initSearch = searchParams.get("s");
-  const initSort = searchParams.get("sort");
+  const searchKeyword = searchParams.get("s");
+  const sortKeyword = searchParams.get("sort");
+
+  const sortBy = ["", "likep", "commp"];
+
+  // 保存上一次浏览到的位置
   function saveScrollPosition() {
     if (typeof window !== "undefined") {
       var scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -40,74 +46,90 @@ export default function Page() {
       window.scrollTo(0, savedScrollY);
     }
   }
-  if (!isInitSorted) {
-    if (initSort == "likep") setSortType(1);
-    if (initSort == "commp") setSortType(2);
-    setIsInitSorted(true);
-  }
 
-  function onSortClick() {
-    localStorage.setItem("scrollPosition", 0);
-    setSortType(sortType + 1);
-    if (sortType >= 2) setSortType(0);
-    console.log(sortType);
+  function onTopButtonClick() {
+      if (typeof window !== "undefined") {
+        // 回到顶部
+        window.scrollTo(0, 0);
+        localStorage.setItem("scrollPosition", 0);
+      }
   }
-  const words = ["", "likep", "commp"];
+  function onSortButtonClick() {
+    // 回到顶部
+    localStorage.setItem("scrollPosition", 0);
+    // 如果sortType下一个元素是空的 就返回0
+    if ((sortType + 1) > 2) {
+      setSortType(0);
+      localStorage.setItem("sortType" , sortType);
+    } else {
+    // 如果有元素就返回元素
+      setSortType(sortType + 1);
+      localStorage.setItem("sortType" , sortType);
+    }
+    
+    // if (sortType >= 2) setSortType(0);
+    
+    // console.log(sortType);
+  }
+  
   return (
     <>
-      <div className="seprate"></div>
-      <h1>
-        <img
-          className="xxlb"
-          src="./salt.webp"
-          onClick={() =>
-            toast.error("不要点我 操你妈", {
-              position: "top-center",
-              autoClose: 500,
-            })
-          }
-        ></img>
-        Majdata.Net
-      </h1>
-      <div className="links">
-        {initSearch ? (
-          <div className="linkContent">
-            <a href="./">返回</a>
-          </div>
-        ) : (
-          <>
-            <div
-              className="linkContent"
-              style={{ boxShadow: "0px 0px 3px gold" }}
-            >
-              <a href="./contest">妹妹唱歌</a>
-            </div>
-            <div className="linkContent">
-              <a href="./dydy">匿名板</a>
-            </div>
-            <div className="linkContent">
-              <a href="./edit">编辑器</a>
-            </div>
-          </>
-        )}
-
-        {/* <div className='linkContent'><Link href='./contest'>MMFC 6th</Link></div> */}
-        <UserInfo apiroot={apiroot3} />
+      {/* 导航栏 */}
+      <div className="navBar" onScroll={onTopButtonClick}>
+        <div className="seprate"></div>
+        <h1>
+          <img
+            className="xxlb"
+            src="./salt.webp"
+            onClick={() =>
+              toast.error("不要点我 操你妈", {
+                position: "top-center",
+                autoClose: 500,
+              })
+            }
+          ></img>
+          Majdata.Net
+        </h1>
+        <div className="links">
+            <>
+              <div
+                className="linkContent"
+                style={{ boxShadow: "0px 0px 3px gold" }}
+              >
+                <a href="./contest">妹妹唱歌</a>
+              </div>
+              <div className="linkContent">
+                <a href="./dydy">匿名板</a>
+              </div>
+              <div className="linkContent">
+                <a href="./edit">编辑器</a>
+              </div>
+            </>
+          {/* <div className='linkContent'><Link href='./contest'>MMFC 6th</Link></div> */}
+          <UserInfo apiroot={apiroot3} />
+        </div>
       </div>
-      <div
-        className="topButton"
-        onClick={() => {
-          if (typeof window !== "undefined") {
-            window.scrollTo(0, 0);
-          }
-        }}
-      >
+      
+      {/* 侧边按钮 */}
+      <div className="topButton" onClick={onTopButtonClick}>
         顶
       </div>
-      <div className="topButton sortButton" onClick={onSortClick}>
+      <div className="topButton sortButton" onClick={onSortButtonClick}>
         序
       </div>
+
       {/* <EventLogo /> */}
+
+      {/* 谱面列表 */}
+      <TheList
+        tippy={target}
+        searchKeyword={searchKeyword}
+        onLoad={onListLoadScroll}
+        sort={sortBy[sortType]}
+      />
+      <img className="footerImage" loading="lazy" src={"/bee.webp"} alt="" />
+
+      {/* 网页组件 */}
       <ToastContainer
         position="bottom-center"
         autoClose={3000}
@@ -126,28 +148,22 @@ export default function Page() {
         placement="top-start"
         interactive={true}
       />
-      <TheList
-        tippy={target}
-        initSearch={initSearch}
-        onLoad={onListLoadScroll}
-        sort={words[sortType]}
-      />
-      <img className="footerImage" loading="lazy" src={"/bee.webp"} alt="" />
+
     </>
   );
 }
 
 function CoverPic({ id }) {
-  let url = apiroot3 + `/Image/${id}`;
-  let urlfull = apiroot3 + `/ImageFull/${id}`;
+  let imgURL = apiroot3 + `/Image/${id}`;
+  let imgURLFull = apiroot3 + `/ImageFull/${id}`;
   return (
     <>
       <PhotoProvider
         bannerVisible={false}
         loadingElement={<div className="loading"></div>}
       >
-        <PhotoView src={urlfull}>
-          <img className="songImg" loading="lazy" src={url} alt="" />
+        <PhotoView src={imgURLFull}>
+          <img className="songImg" loading="lazy" src={imgURL} alt="" />
         </PhotoView>
       </PhotoProvider>
       {/* <div className='songId'>{id}</div> */}
@@ -233,14 +249,14 @@ function SearchBar({ onChange, initS }) {
 const fetcher = async (...args) =>
   await fetch(...args).then(async (res) => res.json());
 
-function TheList({ tippy, initSearch, onLoad, sort }) {
+function TheList({ tippy, searchKeyword, onLoad, sort }) {
   const { data, error, isLoading } = useSWR(
     apiroot3 + "/SongList?sort=" + sort,
     fetcher
   );
   const [filteredList, setFilteredList] = new useState(data);
   const [isLoaded, setIsLoaded] = new useState(false);
-  const [sKey, setSKey] = new useState(initSearch);
+  const [sKey, setSKey] = new useState(searchKeyword);
   const [lastS, setLastS] = new useState("");
   const [lastSo, setLastSo] = new useState(sort);
   const debounced = useDebouncedCallback(
@@ -419,7 +435,7 @@ function TheList({ tippy, initSearch, onLoad, sort }) {
           setSKey(e.target.value);
           localStorage.setItem("scrollPosition", 0);
         }}
-        initS={initSearch}
+        initS={searchKeyword}
       />
       <div className="theList">{list}</div>
     </>
